@@ -1,29 +1,39 @@
 import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.security.KeyPair;
+import java.util.*;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 public class CentroDistribuicao {
     private final int aditivo;
     private final int gasolina;
     private final int alcool1;
-    private final int acool2;
+    private final int alcool2;
     private SITUACAO situacao;
+    private List<Entry<Integer, Integer>> paresDeValorEMaximo;
 
     public enum TIPOPOSTO {COMUM, ESTRATEGICO}
 
     public static final int MAX_ADITIVO = 500;
     public static final int MAX_ALCOOL = 2500;
     public static final int MAX_GASOLINA = 10000;
+    public static final int PORCENTAGEM_SOBRAVISO = 50;
+    public static final int PORCENTAGEM_EMERGENCIA = 25;
 
     public CentroDistribuicao(int tAditivo, int tGasolina, int tAlcool1, int tAlcool2) {
         this.aditivo = tAditivo;
         this.gasolina = tGasolina;
         this.alcool1 = tAlcool1;
-        this.acool2 = tAlcool2;
+        this.alcool2 = tAlcool2;
+        this.paresDeValorEMaximo = List.of(
+                new SimpleEntry(this.aditivo, MAX_ADITIVO),
+                new SimpleEntry(this.gasolina, MAX_GASOLINA),
+                new SimpleEntry(this.alcool1, MAX_ALCOOL / 2),
+                new SimpleEntry(this.alcool2, MAX_ALCOOL / 2)
+        );
 
-        if (this.valoresEstaoInvalidos(tAditivo, tGasolina, tAlcool1, tAlcool2)) {
+        if (this.valoresEstaoInvalidos()) {
             throw new InvalidParameterException();
         }
 
@@ -31,11 +41,23 @@ public class CentroDistribuicao {
     }
 
     public void defineSituacao() {
-        this.situacao = SITUACAO.NORMAL;
+        this.paresDeValorEMaximo.forEach(entry -> {
+            int porcentagem = this.calculaPorcentagem(entry.getValue(), entry.getKey());
+            if (porcentagem < PORCENTAGEM_EMERGENCIA) {
+                this.situacao = SITUACAO.EMERGENCIA;
+                return;
+            }
+
+            if (porcentagem < PORCENTAGEM_SOBRAVISO) {
+                this.situacao = SITUACAO.SOBRAVISO;
+            }
+        });
+
+        this.situacao = this.situacao != null ? this.situacao : SITUACAO.NORMAL;
     }
 
     public SITUACAO getSituacao() {
-        return SITUACAO.NORMAL;
+        return this.situacao;
     }
 
     public int gettGasolina() {
@@ -51,7 +73,7 @@ public class CentroDistribuicao {
     }
 
     public int gettAlcool2() {
-        return this.acool2;
+        return this.alcool2;
     }
 
     public int recebeAditivo(int qtdade) {
@@ -70,17 +92,20 @@ public class CentroDistribuicao {
         return new int[3];
     }
 
-    private boolean valoresEstaoInvalidos(int tAditivo, int tGasolina, int tAlcool1, int tAlcool2) {
-        boolean valorNegativo = Stream.of(tAditivo, tGasolina, tAlcool1, tAlcool2)
+    private boolean valoresEstaoInvalidos() {
+        boolean valorNegativo = Stream.of(this.aditivo, this.gasolina, this.alcool1, this.alcool2)
                 .map(number -> number < 0)
                 .reduce((bool, otherBool) -> bool || otherBool).orElse(false);
-        Map<Integer, Integer> a = Map.of(tAditivo, MAX_ADITIVO, tGasolina, MAX_GASOLINA, tAlcool1, MAX_ALCOOL / 2, tAlcool2, MAX_ALCOOL / 2);
-        Boolean valorMax = a.entrySet()
+        Boolean valorMax = this.paresDeValorEMaximo
                 .stream()
                 .map(entry -> entry.getKey() > entry.getValue())
                 .reduce((acc, value) -> acc || value)
                 .orElse(false);
         return valorNegativo || valorMax;
+    }
+
+    private int calculaPorcentagem(int total, int valor) {
+        return (valor * 100) / total;
     }
 }
 
