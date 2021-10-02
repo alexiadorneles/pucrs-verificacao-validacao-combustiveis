@@ -24,6 +24,10 @@ class CentroDistribuicaoTest {
             "500,10000,1350,1250",
             "500,10000,1350,1251",
             "500,10000,1350,1350",
+            "-2,10000,1350,1350",
+            "500,-1000,1350,1350",
+            "500,10000,-1350,1350",
+            "500,10000,1350,-1350",
     })
     void construtorDeveDarErroQuandoLimiteAtingido(int aditivo, int gasolina, int alcool1, int alcool2) {
         assertThrows(IllegalArgumentException.class, () -> new CentroDistribuicao(aditivo, gasolina, alcool1, alcool2));
