@@ -1,0 +1,3 @@
+public enum SITUACAO {
+    NORMAL, SOBRAVISO, EMERGENCIA
+}
