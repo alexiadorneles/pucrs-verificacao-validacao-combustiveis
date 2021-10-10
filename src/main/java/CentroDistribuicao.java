@@ -105,10 +105,12 @@ public class CentroDistribuicao {
             int result = qtdade + (MAX_ALCOOL - (this.alcool1 + this.alcool2 + qtdade));
             this.alcool1 = MAX_ALCOOL / 2;
             this.alcool2 = MAX_ALCOOL / 2;
+            this.defineSituacao();
             return result;
         }
         this.alcool1 += qtdade / 2;
         this.alcool2 += qtdade / 2;
+        this.defineSituacao();
         return qtdade;
     }
 
