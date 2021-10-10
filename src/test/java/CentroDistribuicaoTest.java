@@ -33,29 +33,6 @@ class CentroDistribuicaoTest {
         assertThrows(IllegalArgumentException.class, () -> new CentroDistribuicao(aditivo, gasolina, alcool1, alcool2));
     }
 
-    @org.junit.jupiter.api.Test
-    void defineSituacao() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void getSituacao() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void gettGasolina() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void gettAditivo() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void gettAlcool1() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void gettAlcool2() {
-    }
 
     @org.junit.jupiter.api.Test
     void recebeAditivo() {
