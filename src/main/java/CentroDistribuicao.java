@@ -11,7 +11,6 @@ public class CentroDistribuicao {
     private int alcool1;
     private int alcool2;
     private SITUACAO situacao;
-    private List<Entry<Integer, Integer>> paresDeValorEMaximo;
 
     public enum TIPOPOSTO {COMUM, ESTRATEGICO}
 
@@ -26,12 +25,6 @@ public class CentroDistribuicao {
         this.gasolina = tGasolina;
         this.alcool1 = tAlcool1;
         this.alcool2 = tAlcool2;
-        this.paresDeValorEMaximo = List.of(
-                new SimpleEntry(this.aditivo, MAX_ADITIVO),
-                new SimpleEntry(this.gasolina, MAX_GASOLINA),
-                new SimpleEntry(this.alcool1, MAX_ALCOOL / 2),
-                new SimpleEntry(this.alcool2, MAX_ALCOOL / 2)
-        );
 
         if (this.valoresEstaoInvalidos()) {
             throw new InvalidParameterException();
@@ -41,19 +34,23 @@ public class CentroDistribuicao {
     }
 
     public void defineSituacao() {
-        this.paresDeValorEMaximo.forEach(entry -> {
+        boolean situacaoVirouEmergencia = false;
+        boolean situacaoVirouSobraviso = false;
+        for (Entry<Integer, Integer> entry : this.getParesDeValorEMaximo()) {
             int porcentagem = this.calculaPorcentagem(entry.getValue(), entry.getKey());
             if (porcentagem < PORCENTAGEM_EMERGENCIA) {
                 this.situacao = SITUACAO.EMERGENCIA;
+                situacaoVirouEmergencia = true;
                 return;
             }
 
-            if (porcentagem < PORCENTAGEM_SOBRAVISO) {
+            if (!situacaoVirouEmergencia && porcentagem < PORCENTAGEM_SOBRAVISO) {
                 this.situacao = SITUACAO.SOBRAVISO;
+                situacaoVirouSobraviso = true;
             }
-        });
+        }
 
-        this.situacao = this.situacao != null ? this.situacao : SITUACAO.NORMAL;
+        this.situacao = situacaoVirouSobraviso || situacaoVirouEmergencia ? this.situacao : SITUACAO.NORMAL;
     }
 
     public SITUACAO getSituacao() {
@@ -81,9 +78,11 @@ public class CentroDistribuicao {
         if (this.aditivo + qtdade > MAX_ADITIVO) {
             int result = qtdade + (MAX_ADITIVO - (this.aditivo + qtdade));
             this.aditivo = MAX_ADITIVO;
+            this.defineSituacao();
             return result;
         }
         this.aditivo += qtdade;
+        this.defineSituacao();
         return qtdade;
     }
 
@@ -119,7 +118,7 @@ public class CentroDistribuicao {
         boolean valorNegativo = Stream.of(this.aditivo, this.gasolina, this.alcool1, this.alcool2)
                 .map(number -> number < 0)
                 .reduce((bool, otherBool) -> bool || otherBool).orElse(false);
-        Boolean valorMax = this.paresDeValorEMaximo
+        Boolean valorMax = this.getParesDeValorEMaximo()
                 .stream()
                 .map(entry -> entry.getKey() > entry.getValue())
                 .reduce((acc, value) -> acc || value)
@@ -129,6 +128,15 @@ public class CentroDistribuicao {
 
     private int calculaPorcentagem(int total, int valor) {
         return (valor * 100) / total;
+    }
+
+    private List<Entry<Integer, Integer>> getParesDeValorEMaximo() {
+        return List.of(
+                new SimpleEntry(this.aditivo, MAX_ADITIVO),
+                new SimpleEntry(this.gasolina, MAX_GASOLINA),
+                new SimpleEntry(this.alcool1, MAX_ALCOOL / 2),
+                new SimpleEntry(this.alcool2, MAX_ALCOOL / 2)
+        );
     }
 }
 

@@ -90,6 +90,14 @@ class CentroDistribuicaoTest {
         assertEquals(tanque / 2, centroDistribuicao.gettAlcool2());
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(AditivoAbasteceSituacaoProvider.class)
+    void recebeAditivoMudaSituacao(int valorInicial, int valorAbastecimento, SITUACAO esperada) {
+        CentroDistribuicao centro = new CentroDistribuicao(valorInicial, 8000, 1200, 1200);
+        centro.recebeAditivo(valorAbastecimento);
+        assertEquals(centro.getSituacao(), esperada);
+    }
+
     @Test
     void encomendaCombustivel() {
     }
