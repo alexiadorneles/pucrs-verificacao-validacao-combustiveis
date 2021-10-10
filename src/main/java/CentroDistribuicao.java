@@ -91,9 +91,11 @@ public class CentroDistribuicao {
         if (this.gasolina + qtdade > MAX_GASOLINA) {
             int result = qtdade + (MAX_GASOLINA - (this.gasolina + qtdade));
             this.gasolina = MAX_GASOLINA;
+            this.defineSituacao();
             return result;
         }
         this.gasolina += qtdade;
+        this.defineSituacao();
         return qtdade;
     }
 
