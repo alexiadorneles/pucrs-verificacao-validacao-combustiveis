@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public class CentroDistribuicao {
     private int aditivo;
-    private final int gasolina;
+    private int gasolina;
     private final int alcool1;
     private final int alcool2;
     private SITUACAO situacao;
@@ -88,7 +88,14 @@ public class CentroDistribuicao {
     }
 
     public int recebeGasolina(int qtdade) {
-        return 0;
+        if (qtdade < 0) return -1;
+        if (this.gasolina + qtdade > MAX_GASOLINA) {
+            int result = qtdade + (MAX_GASOLINA - (this.gasolina + qtdade));
+            this.gasolina = MAX_GASOLINA;
+            return result;
+        }
+        this.gasolina += qtdade;
+        return qtdade;
     }
 
     public int recebeAlcool(int qtdade) {
