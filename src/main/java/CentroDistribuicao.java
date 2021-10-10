@@ -8,8 +8,8 @@ import java.util.stream.Stream;
 public class CentroDistribuicao {
     private int aditivo;
     private int gasolina;
-    private final int alcool1;
-    private final int alcool2;
+    private int alcool1;
+    private int alcool2;
     private SITUACAO situacao;
     private List<Entry<Integer, Integer>> paresDeValorEMaximo;
 
@@ -99,7 +99,16 @@ public class CentroDistribuicao {
     }
 
     public int recebeAlcool(int qtdade) {
-        return 0;
+        if (qtdade < 0) return -1;
+        if (this.alcool1 + this.alcool2 + qtdade > MAX_ALCOOL) {
+            int result = qtdade + (MAX_ALCOOL - (this.alcool1 + this.alcool2 + qtdade));
+            this.alcool1 = MAX_ALCOOL / 2;
+            this.alcool2 = MAX_ALCOOL / 2;
+            return result;
+        }
+        this.alcool1 += qtdade / 2;
+        this.alcool2 += qtdade / 2;
+        return qtdade;
     }
 
     public int[] encomendaCombustivel(int qtdade, TIPOPOSTO tipoPosto) {

@@ -69,11 +69,25 @@ class CentroDistribuicaoTest {
         int resultado = centroDistribuicao.recebeGasolina(valorEntrada);
         assertEquals(esperado, resultado);
         assertEquals(tanque, centroDistribuicao.gettGasolina());
-
     }
 
-    @Test
-    void recebeAlcool() {
+    @ParameterizedTest
+    @CsvSource({
+            "0,2500,2500,2500",
+            "0,2501,2500,2500",
+            "2000,1000,500,2500",
+            "0,2000,2000,2000",
+            "1000,1000,1000,2000",
+            "0,-10,-1,0",
+            "0,0,0,0",
+            "2500,20,0,2500",
+    })
+    void recebeAlcool(int quantidadeExistente, int valorEntrada, int esperado, int tanque) {
+        CentroDistribuicao centroDistribuicao = new CentroDistribuicao(0, 0, quantidadeExistente / 2, quantidadeExistente / 2);
+        int resultado = centroDistribuicao.recebeAlcool(valorEntrada);
+        assertEquals(esperado, resultado);
+        assertEquals(tanque / 2, centroDistribuicao.gettAlcool1());
+        assertEquals(tanque / 2, centroDistribuicao.gettAlcool2());
     }
 
     @Test
