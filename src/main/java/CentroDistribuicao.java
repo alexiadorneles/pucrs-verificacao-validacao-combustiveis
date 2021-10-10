@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 public class CentroDistribuicao {
-    private final int aditivo;
+    private int aditivo;
     private final int gasolina;
     private final int alcool1;
     private final int alcool2;
@@ -77,7 +77,14 @@ public class CentroDistribuicao {
     }
 
     public int recebeAditivo(int qtdade) {
-        return 0;
+        if (qtdade < 0) return -1;
+        if (this.aditivo + qtdade > MAX_ADITIVO) {
+            int result = qtdade + (MAX_ADITIVO - (this.aditivo + qtdade));
+            this.aditivo = MAX_ADITIVO;
+            return result;
+        }
+        this.aditivo += qtdade;
+        return qtdade;
     }
 
     public int recebeGasolina(int qtdade) {

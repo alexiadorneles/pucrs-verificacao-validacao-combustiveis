@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -34,19 +35,33 @@ class CentroDistribuicaoTest {
     }
 
 
-    @org.junit.jupiter.api.Test
-    void recebeAditivo() {
+    @ParameterizedTest
+    @CsvSource({
+            "0,500,500,500",
+            "0,501,500,500",
+            "50,470,450,500",
+            "0,400,400,400",
+            "100,300,300,400",
+            "0,-10,-1,0",
+            "0,0,0,0",
+            "500,20,0,500",
+    })
+    void recebeAditivo(int quantidadeExistente, int valorEntrada, int esperado, int tanque) {
+        CentroDistribuicao centroDistribuicao = new CentroDistribuicao(quantidadeExistente, 0, 0, 0);
+        int resultado = centroDistribuicao.recebeAditivo(valorEntrada);
+        assertEquals(esperado, resultado);
+        assertEquals(tanque, centroDistribuicao.gettAditivo());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void recebeGasolina() {
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void recebeAlcool() {
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void encomendaCombustivel() {
     }
 }
