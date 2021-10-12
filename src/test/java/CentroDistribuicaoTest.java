@@ -123,14 +123,12 @@ class CentroDistribuicaoTest {
             int gasolina,
             int alcool1,
             int alcool2,
-            SITUACAO inicial,
             int quantidade,
             TIPOPOSTO tipoPosto,
             List<Integer> esperado,
             SITUACAO situacao
     ) {
         CentroDistribuicao centroDistribuicao = new CentroDistribuicao(aditivo, gasolina, alcool1, alcool2);
-        assertEquals(inicial, centroDistribuicao.getSituacao());
         int[] resultado = centroDistribuicao.encomendaCombustivel(quantidade, tipoPosto);
         for (int i = 0; i < resultado.length; i++) {
             assertEquals(esperado.get(i), resultado[i]);
