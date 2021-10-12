@@ -12,13 +12,14 @@ public class CentroDistribuicao {
     private int alcool2;
     private SITUACAO situacao;
 
-    public enum TIPOPOSTO {COMUM, ESTRATEGICO}
-
     public static final int MAX_ADITIVO = 500;
     public static final int MAX_ALCOOL = 2500;
     public static final int MAX_GASOLINA = 10000;
     public static final int PORCENTAGEM_SOBRAVISO = 50;
     public static final int PORCENTAGEM_EMERGENCIA = 25;
+    public static final double PORCENTAGEM_ALCOOL = 0.25;
+    public static final double PORCENTAGEM_GASOLINA = 0.7;
+    public static final double PORCENTAGEM_ADITIVO = 0.05;
 
     public CentroDistribuicao(int tAditivo, int tGasolina, int tAlcool1, int tAlcool2) {
         this.aditivo = tAditivo;
@@ -77,12 +78,10 @@ public class CentroDistribuicao {
         if (qtdade < 0) return -1;
         if (this.aditivo + qtdade > MAX_ADITIVO) {
             int result = qtdade + (MAX_ADITIVO - (this.aditivo + qtdade));
-            this.aditivo = MAX_ADITIVO;
-            this.defineSituacao();
+            this.setAditivo(MAX_ADITIVO);
             return result;
         }
-        this.aditivo += qtdade;
-        this.defineSituacao();
+        this.setAditivo(this.aditivo + qtdade);
         return qtdade;
     }
 
@@ -90,12 +89,10 @@ public class CentroDistribuicao {
         if (qtdade < 0) return -1;
         if (this.gasolina + qtdade > MAX_GASOLINA) {
             int result = qtdade + (MAX_GASOLINA - (this.gasolina + qtdade));
-            this.gasolina = MAX_GASOLINA;
-            this.defineSituacao();
+            this.setGasolina(MAX_GASOLINA);
             return result;
         }
-        this.gasolina += qtdade;
-        this.defineSituacao();
+        this.setGasolina(this.gasolina + qtdade);
         return qtdade;
     }
 
@@ -103,19 +100,38 @@ public class CentroDistribuicao {
         if (qtdade < 0) return -1;
         if (this.alcool1 + this.alcool2 + qtdade > MAX_ALCOOL) {
             int result = qtdade + (MAX_ALCOOL - (this.alcool1 + this.alcool2 + qtdade));
-            this.alcool1 = MAX_ALCOOL / 2;
-            this.alcool2 = MAX_ALCOOL / 2;
-            this.defineSituacao();
+            this.setAlcool(MAX_ALCOOL);
             return result;
         }
-        this.alcool1 += qtdade / 2;
-        this.alcool2 += qtdade / 2;
-        this.defineSituacao();
+        this.somaAlcool(qtdade);
         return qtdade;
     }
 
     public int[] encomendaCombustivel(int qtdade, TIPOPOSTO tipoPosto) {
-        return new int[3];
+        if (qtdade < 1) {
+            return new int[]{-7};
+        }
+        int quantidadeGasolina = (int) (qtdade * PORCENTAGEM_GASOLINA);
+        int quantidadeAlcool = (int) (qtdade * PORCENTAGEM_ALCOOL);
+        int quantidadeAditivo = (int) (qtdade * PORCENTAGEM_ADITIVO);
+        if (!possuiComponentes(quantidadeAditivo, quantidadeGasolina, quantidadeAlcool, tipoPosto))
+            return new int[]{-21};
+
+        if (this.getSituacao().equals(SITUACAO.NORMAL) || tipoPosto == TIPOPOSTO.ESTRATEGICO) {
+            this.reduzirDoTanque(quantidadeGasolina, quantidadeAlcool, quantidadeAditivo);
+        } else if (this.getSituacao().equals(SITUACAO.SOBRAVISO)) {
+            this.reduzirDoTanque(quantidadeGasolina / 2, quantidadeAlcool / 2, quantidadeAditivo / 2);
+        } else if (this.getSituacao().equals(SITUACAO.EMERGENCIA)) {
+            return new int[]{-14};
+        }
+
+        return new int[]{this.aditivo, this.gasolina, this.alcool1, this.alcool2};
+    }
+
+    private void reduzirDoTanque(int quantidadeGasolina, int quantidadeAlcool, int quantidadeAditivo) {
+        this.setAlcool(this.alcool1 + this.alcool2 - quantidadeAlcool);
+        this.setGasolina(this.gasolina - quantidadeGasolina);
+        this.setAditivo(this.aditivo - quantidadeAditivo);
     }
 
     private boolean valoresEstaoInvalidos() {
@@ -141,6 +157,36 @@ public class CentroDistribuicao {
                 new SimpleEntry(this.alcool1, MAX_ALCOOL / 2),
                 new SimpleEntry(this.alcool2, MAX_ALCOOL / 2)
         );
+    }
+
+    private boolean possuiComponentes(int aditivo, int gasolina, int alcool, TIPOPOSTO tipoPosto) {
+        boolean temGasolinaEAlcool = gasolina <= this.gasolina && alcool <= (this.alcool1 + this.alcool2);
+        boolean temAditivo = aditivo <= this.aditivo;
+        if (!temGasolinaEAlcool) return false;
+        if (temAditivo) return true;
+        return this.getSituacao() == SITUACAO.EMERGENCIA && tipoPosto == TIPOPOSTO.ESTRATEGICO;
+    }
+
+    private void setAditivo(int value) {
+        this.aditivo = Math.max(value, 0);
+        this.defineSituacao();
+    }
+
+    private void setGasolina(int value) {
+        this.gasolina = Math.max(value, 0);
+        this.defineSituacao();
+    }
+
+    private void setAlcool(int value) {
+        this.alcool1 = Math.max(value, 0) / 2;
+        this.alcool2 = Math.max(value, 0) / 2;
+        this.defineSituacao();
+    }
+
+    private void somaAlcool(int value) {
+        this.alcool1 += value / 2;
+        this.alcool2 += value / 2;
+        this.defineSituacao();
     }
 }
 

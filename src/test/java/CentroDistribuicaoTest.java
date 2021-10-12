@@ -1,7 +1,8 @@
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -114,7 +115,27 @@ class CentroDistribuicaoTest {
         assertEquals(centro.getSituacao(), esperada);
     }
 
-    @Test
-    void encomendaCombustivel() {
+
+    @ParameterizedTest
+    @ArgumentsSource(EncomendaCombustivelProvider.class)
+    void encomendaCombustivel(
+            int aditivo,
+            int gasolina,
+            int alcool1,
+            int alcool2,
+            SITUACAO inicial,
+            int quantidade,
+            TIPOPOSTO tipoPosto,
+            List<Integer> esperado,
+            SITUACAO situacao
+    ) {
+        CentroDistribuicao centroDistribuicao = new CentroDistribuicao(aditivo, gasolina, alcool1, alcool2);
+        assertEquals(inicial, centroDistribuicao.getSituacao());
+        int[] resultado = centroDistribuicao.encomendaCombustivel(quantidade, tipoPosto);
+        for (int i = 0; i < resultado.length; i++) {
+            assertEquals(esperado.get(i), resultado[i]);
+        }
+        assertEquals(situacao, centroDistribuicao.getSituacao());
     }
+
 }
